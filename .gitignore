@@ -28,3 +28,10 @@ sysinfo.txt
 # Builds
 *.apk
 *.unitypackage
+
+# Purchased Assets
+Assets/Resources/Models/Destructible_Cars_2_Collection/
+Assets/Resources/Models/DestructibleCars/
+Assets/Resources/SFX/
+Assets/Toon Particles - Fire Collection/
+Assets/Libraries/
