@@ -4,6 +4,7 @@ using UnityEngine.EventSystems;
 using System.Collections.Generic;
 using Rewired;
 using System.Linq;
+using System;
 
 public class Interface : MonoBehaviour
 {
@@ -73,17 +74,6 @@ public class Interface : MonoBehaviour
 
         playerManagementContinueButton.interactable = AllPlayersPickedControllers();
     }
-    /*public void RemovePlayerPrompt()
-    {
-        if(playerPrompts != null)
-        {
-            PlayerPrompt playerPrompt = playerPrompts[playerPrompts.Count - 1];
-            playerPrompts.Remove(playerPrompt);
-            Destroy(playerPrompt.gameObject);
-        }
-
-        playerManagementContinueButton.interactable = AllPlayersPickedControllers();
-    }*/
     public void RemoveAllPlayerPrompts()
     {
         for (int i = playerPrompts.Count - 1; i >= 0; i--)
@@ -107,29 +97,36 @@ public class Interface : MonoBehaviour
     }
     private void OnControllerDropdownValueChanged(int value)
     {
-        if (value - 1 < controllersInPrompts.Length)
+        CheckInputSelection(EventSystem.current.currentSelectedGameObject.GetComponentInParent<PlayerPrompt>());
+    }
+    private void CheckInputSelection(PlayerPrompt prompt)
+    {
+        if (prompt && prompt.inputDropdown)
         {
-            PlayerPrompt promptEffected = EventSystem.current.currentSelectedGameObject.GetComponentInParent<PlayerPrompt>();
-            if (promptEffected)
+            int value = prompt.inputDropdown.value;
+            if (value - 1 < controllersInPrompts.Length)
             {
-                RefreshLayoutDropdown(promptEffected);
+                if (prompt)
+                {
+                    RefreshLayoutDropdown(prompt);
 
-                promptEffected.inputTypeImage.color = new Color(0, 0, 0, 1);
-                if (value <= 0)
-                {
-                    promptEffected.inputTypeImage.color = new Color(0, 0, 0, 0);
-                }
-                else if (controllersInPrompts[value - 1].type == ControllerType.Keyboard)
-                {
-                    promptEffected.inputTypeImage.overrideSprite = keyboardIcon;
-                }
-                else if (controllersInPrompts[value - 1].type == ControllerType.Mouse)
-                {
-                    promptEffected.inputTypeImage.overrideSprite = mouseIcon;
-                }
-                else
-                {
-                    promptEffected.inputTypeImage.overrideSprite = joystickIcon;
+                    prompt.inputTypeImage.color = new Color(0, 0, 0, 1);
+                    if (value <= 0)
+                    {
+                        prompt.inputTypeImage.color = new Color(0, 0, 0, 0);
+                    }
+                    else if (controllersInPrompts[value - 1].type == ControllerType.Keyboard)
+                    {
+                        prompt.inputTypeImage.overrideSprite = keyboardIcon;
+                    }
+                    else if (controllersInPrompts[value - 1].type == ControllerType.Mouse)
+                    {
+                        prompt.inputTypeImage.overrideSprite = mouseIcon;
+                    }
+                    else
+                    {
+                        prompt.inputTypeImage.overrideSprite = joystickIcon;
+                    }
                 }
             }
         }
@@ -150,13 +147,13 @@ public class Interface : MonoBehaviour
             }
             #endregion
 
+            Controller[] previousControllers = controllersInPrompts;
             controllersInPrompts = ReInput.controllers.Controllers.ToArray();
             List<string> controllerNames = new List<string>();
             controllerNames.Add("None");
             foreach (Controller controller in controllersInPrompts)
             {
-                //if (controller.type != ControllerType.Mouse)
-                    controllerNames.Add(controller.name);
+                controllerNames.Add(controller.name);
             }
 
             for (int i = 0; i < playerPrompts.Count; i++)
@@ -164,10 +161,27 @@ public class Interface : MonoBehaviour
                 PlayerPrompt playerPrompt = playerPrompts[i];
                 playerPrompt.playerText.text = "Player " + (i > 8 ? "" : "0") + (i + 1);
 
+                int selectionIndex = -1;
+                #region Check Controller Selection
+                if (playerPrompt.inputDropdown.value > 0)
+                {
+                    Controller inputSelection = previousControllers[playerPrompt.inputDropdown.value - 1];
+                    
+                    if (inputSelection.isConnected)
+                    {
+                        for(int j = 0; j < controllersInPrompts.Length; j++)
+                        {
+                            if(controllersInPrompts[j] == inputSelection) { selectionIndex = j; break; }
+                        }
+                    }
+                    //Debug.Log("Index Found: " + selectionIndex);
+                }
+                #endregion
                 playerPrompt.inputDropdown.ClearOptions();
                 playerPrompt.inputDropdown.AddOptions(controllerNames);
 
-                RefreshLayoutDropdown(playerPrompt);
+                playerPrompt.inputDropdown.value = selectionIndex + 1;
+                CheckInputSelection(playerPrompt);
             }
         }
     }
