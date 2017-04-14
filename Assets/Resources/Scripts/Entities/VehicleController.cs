@@ -3,7 +3,7 @@ using UnityEngine.UI;
 using System.Collections;
 
 [RequireComponent(typeof(Rigidbody2D))]
-public class VehicleController : MonoBehaviour
+public class VehicleController : MonoBehaviour, Damageable
 {
     public const float ME2KI = 3600f / 1000f, KI2ME = 1000f / 3600f, KI2MI = 0.621371f;
     public GameObject vehicleObject;
@@ -34,7 +34,8 @@ public class VehicleController : MonoBehaviour
     public Transform[] thrusters;
     public GameObject[] frontBumpers, sidePanels, rearBumpers;
     public Transform smokePosition, firePosition, explosionPosition;
-    private ParticleSystem smoke, fire, explosion;
+    private ParticleSystem smoke, fire;
+    private ExplosionController explosion;
     private Rigidbody2D _vehicleBody;
     public Rigidbody2D vehicleBody { get { if (!_vehicleBody) PrepareVehicleBody(); return _vehicleBody; } private set { _vehicleBody = value; } }
 
@@ -86,6 +87,7 @@ public class VehicleController : MonoBehaviour
     }
     void OnCollisionEnter2D(Collision2D col)
     {
+        //Debug.Log(col.relativeVelocity + " == " + velocity);
         Vector2 changeInVelocity = velocity - vehicleBody.velocity;
 
         VehicleController otherShip = col.gameObject.GetComponent<VehicleController>();
@@ -272,9 +274,10 @@ public class VehicleController : MonoBehaviour
         else if (amount < 0) health = 0;
 
         SmokeAndFire();
-        StartCoroutine(CheckDeath());
+        CheckDeath();
+        //StartCoroutine(CheckDeath());
     }
-    private IEnumerator CheckDeath()
+    private void CheckDeath()
     {
         if (health <= 0)
         {
@@ -285,8 +288,10 @@ public class VehicleController : MonoBehaviour
             if (vehicleObject) vehicleObject.SetActive(false);
             if (explosion)
             {
-                explosion.Play();
-                yield return new WaitForSeconds(explosion.duration);
+                explosion.explosionSize = 4;
+                explosion.explosionDamage = 50;
+                explosion.Explode();
+                //yield return new WaitForSeconds(explosion.duration);
             }
             //gameObject.SetActive(false);
             //if (vehicleObject) vehicleObject.SetActive(true);

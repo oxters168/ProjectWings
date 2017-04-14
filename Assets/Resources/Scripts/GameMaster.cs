@@ -11,7 +11,8 @@ public class GameMaster : MonoBehaviour
     public VehicleStatsController vehicleStatsUIPrefab;
     public GameObject vehicleHolsterPrefab;
     public PowerupBox powerupBoxPrefab;
-    public ParticleSystem smokePrefab, firePrefab, explosionPrefab;
+    public ParticleSystem smokePrefab, firePrefab;
+    public ExplosionController explosionPrefab;
 
     public GameObject pauseMenu;
     public bool paused { get; private set; }
@@ -34,7 +35,7 @@ public class GameMaster : MonoBehaviour
 
     void Update()
     {
-        if (ingame && Rewired.ReInput.players.SystemPlayer.GetButtonDown("UICancel")) TogglePause();
+        if (ingame && Rewired.ReInput.players.SystemPlayer.GetButtonDown("Pause")) TogglePause();
         //StartCoroutine(PauseChecker());
     }
 

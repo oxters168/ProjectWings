@@ -16,6 +16,9 @@ public class ProjectileController : MonoBehaviour
     public float rocketAcceleration, rocketRotAcceleration;
     //private float defaultLinearDrag, defaultAngularDrag;
 
+    public ExplosionController explosionPrefab;
+    public float explosiveSize, explosiveDurability;
+
     public float rotTimeout;
     private float thrustPercent, percentRotation;
     private Coroutine rotTimeoutCoroutine;
@@ -34,6 +37,7 @@ public class ProjectileController : MonoBehaviour
 	void Update ()
     {
         CheckLifeSpan();
+        CheckSurroundings();
         CalculateTrajectory();
     }
     void FixedUpdate()
@@ -42,12 +46,17 @@ public class ProjectileController : MonoBehaviour
     }
     void OnCollisionEnter2D(Collision2D col)
     {
+        if (explosiveSize > 0 && col.relativeVelocity.magnitude > explosiveDurability)
+        {
+            SelfDestruct();
+            return;
+        }
         if (!hasHit)
         {
-            VehicleController player = col.gameObject.GetComponent<VehicleController>();
-            if (player)
+            Damageable damageableObject = col.gameObject.GetComponent<Damageable>();
+            if (damageableObject != null)
             {
-                player.ModifyHealth(-hullDamage);
+                if (explosiveSize <= 0) damageableObject.ModifyHealth(-hullDamage);
                 SelfDestruct();
             }
         }
@@ -66,6 +75,17 @@ public class ProjectileController : MonoBehaviour
         }
     }
 
+    private void CheckSurroundings()
+    {
+        if(explosiveSize > 0)
+        {
+            RaycastHit2D hit = Physics2D.CircleCast(transform.position, explosiveSize * 1f, transform.forward);
+            if(hit && hit.transform.GetComponent<Damageable>() != null && Time.time - birthTime > timeToLive * 0.1f)
+            {
+                SelfDestruct();
+            }
+        }
+    }
     private void CalculateTrajectory()
     {
         if(projectileBody && cappedRocketRotSpeed > 0)
@@ -114,6 +134,15 @@ public class ProjectileController : MonoBehaviour
     }
     private void SelfDestruct()
     {
+        if(explosiveSize > 0 && explosionPrefab)
+        {
+            ExplosionController explosion = Instantiate(explosionPrefab);
+            explosion.transform.position = transform.position + transform.forward * (explosiveSize / 2);
+            explosion.explosionSize = explosiveSize;
+            //explosion.pushForce = thrustForce;
+            explosion.explosionDamage = hullDamage;
+            explosion.Explode();
+        }
         Destroy(gameObject);
     }
 }

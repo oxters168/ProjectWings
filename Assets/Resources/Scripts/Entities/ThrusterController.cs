@@ -43,7 +43,7 @@ public class ThrusterController : MonoBehaviour
                         //Vector3 colliderSize = otherBody.GetComponentInChildren<Collider2D>().bounds.size;
                         //float largestSide = Mathf.Max(colliderSize.x, colliderSize.y, colliderSize.z);
 
-                        float totalParticles = mainThruster.particleCount + secondaryThruster.particleCount;
+                        //float totalParticles = mainThruster.particleCount + secondaryThruster.particleCount;
                         //float percentVelocity = incidentVelocity.magnitude / (mainThruster.startSpeed + secondaryThruster.startSpeed) / 2f;
                         //if (percentVelocity < 0) percentVelocity = 0;
                         //if (percentVelocity > 1) percentVelocity = 1;
@@ -57,7 +57,7 @@ public class ThrusterController : MonoBehaviour
                         if (percentForce < 0) percentForce = 0;
                         if (percentForce > 1) percentForce = 1;
 
-                        float forceOnPoint = (vehicleController.thrustForce * percentForce / vehicleController.thrusters.Length) / totalParticles;
+                        float forceOnPoint = (vehicleController.thrustForce * percentForce / vehicleController.thrusters.Length) / Mathf.Clamp(mainThruster.particleCount / 5, 1, 1000);
                         Vector3 thrustForce = incidentVelocity.normalized * forceOnPoint;
                         otherBody.AddForce(thrustForce);
                         otherBody.AddTorque(forceOnPoint * incidentDistance * torqueSign);
@@ -123,7 +123,7 @@ public class ThrusterController : MonoBehaviour
         collision.enableInteriorCollisions = false;
         collision.sendCollisionMessages = true;
         LayerMask layerMask = new LayerMask();
-        layerMask.value = (1 << LayerMask.NameToLayer("World")) | (1 << LayerMask.NameToLayer("Vehicle"));
+        layerMask.value = (1 << LayerMask.NameToLayer("World")) | (1 << LayerMask.NameToLayer("Vehicle") | (1 << LayerMask.NameToLayer("Object")));
         collision.collidesWith = layerMask;
         #endregion
         #region Renderer Module
@@ -184,9 +184,9 @@ public class ThrusterController : MonoBehaviour
         collision.bounce = 0;
         collision.radiusScale = 0.5f;
         collision.enableInteriorCollisions = false;
-        collision.sendCollisionMessages = true;
+        //collision.sendCollisionMessages = true;
         LayerMask layerMask = new LayerMask();
-        layerMask.value = (1 << LayerMask.NameToLayer("World")) | (1 << LayerMask.NameToLayer("Vehicle"));
+        layerMask.value = (1 << LayerMask.NameToLayer("World")) | (1 << LayerMask.NameToLayer("Vehicle") | (1 << LayerMask.NameToLayer("Object")));
         collision.collidesWith = layerMask;
         #endregion
         #region Renderer Module

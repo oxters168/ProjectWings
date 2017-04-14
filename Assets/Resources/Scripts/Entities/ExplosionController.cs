@@ -1,44 +1,57 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System.Collections;
 
 public class ExplosionController : MonoBehaviour
 {
-    public ParticleSystem explosionEffect;
+    private ParticleSystem _explosionEffect;
+    public ParticleSystem explosionEffect { get { if (!_explosionEffect) _explosionEffect = GetComponent<ParticleSystem>(); return _explosionEffect; } }
+    
     private List<ParticleCollisionEvent> collisionEvents = new List<ParticleCollisionEvent>();
+
+    private float pushForce;
+    public float explosionSize, explosionDamage;
+
+    public void Explode()
+    {
+        if (explosionEffect)
+        {
+            explosionEffect.startSize = Mathf.Clamp(explosionSize, 0, 100);
+            explosionEffect.Play();
+            StartCoroutine(WaitForDestruction());
+        }
+    }
+    private IEnumerator WaitForDestruction()
+    {
+        while (explosionEffect.isPlaying) yield return null;
+        Destroy(gameObject);
+    }
 
     void OnParticleCollision(GameObject other)
     {
-        if (other != transform.root.gameObject)
+        if (other != transform.root.gameObject && explosionEffect)
         {
-            //Debug.Log(other.name);
-            Rigidbody2D otherBody = other.GetComponent<Rigidbody2D>();
-            if (otherBody)
+            float percentStrength = Mathf.Clamp01(1 - (explosionEffect.time / explosionEffect.duration));
+
+            Rigidbody2D rigidBody = other.GetComponent<Rigidbody2D>();
+            if (rigidBody)
             {
                 explosionEffect.GetCollisionEvents(other, collisionEvents);
                 for (int i = 0; i < collisionEvents.Count; i++)
                 {
-                    Vector3 incidentVelocity = collisionEvents[i].velocity;
-                    Vector3 intersection = collisionEvents[i].intersection;
-                    Vector3 intersectionDir = intersection - transform.position;
-                    /*if (otherBody != shipController.vehicleBody && Vector3.Dot(transform.forward, intersectionDir.normalized) > 0.9f)
-                    {
-                        float totalParticles = explosionEffect.maxParticles + secondaryThruster.maxParticles;
-                        //float percentVelocity = incidentVelocity.magnitude / (mainThruster.startSpeed + secondaryThruster.startSpeed) / 2f;
-                        //if (percentVelocity < 0) percentVelocity = 0;
-                        //if (percentVelocity > 1) percentVelocity = 1;
+                    //Vector3 intersection = collisionEvents[i].intersection;
+                    //Vector3 intersectionDir = intersection - transform.position;
+                    Vector3 outDirection = other.transform.position - transform.position;
 
-                        float incidentDistance = intersectionDir.magnitude, flameLength = mainThruster.startSpeed * mainThruster.startLifetime;
-                        //float torqueSign = (Vector3.Dot(otherBody.transform.right, intersectionDir.normalized) * -1) * (Vector3.Dot(otherBody.transform.forward, intersectionDir.normalized));
-                        float percentForce = 1 - (incidentDistance / flameLength);
-                        if (percentForce < 0) percentForce = 0;
-                        if (percentForce > 1) percentForce = 1;
-
-                        float forceOnPoint = shipController.thrustForce * percentForce / shipController.thrusters.Length;
-                        Vector3 thrustForce = incidentVelocity.normalized * forceOnPoint;
-                        otherBody.AddForce(thrustForce / totalParticles);
-                        Debug.DrawRay(intersection, thrustForce / totalParticles, Color.black);
-                    }*/
+                    pushForce = explosionEffect.startSize * 750;
+                    rigidBody.AddForce(outDirection * (pushForce / Mathf.Clamp(explosionEffect.particleCount, 1, 1000)) * percentStrength);
                 }
+            }
+
+            Damageable damageableBody = other.GetComponent<Damageable>();
+            if (damageableBody != null)
+            {
+                damageableBody.ModifyHealth(-(explosionDamage / Mathf.Clamp(explosionEffect.particleCount, 1, 1000)) * percentStrength);
             }
         }
     }
