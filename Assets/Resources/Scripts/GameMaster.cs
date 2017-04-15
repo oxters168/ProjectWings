@@ -5,14 +5,16 @@ using UnityEngine;
 public class GameMaster : MonoBehaviour
 {
     public readonly string[] enths = new string[] { "th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th", "th", "th", "th", "th", "th", "th", "th", "th", "th", "th" };
-    public GameObject[] vehicles;
-    public GameObject[] maps;
+    public VehicleController[] vehiclePrefabs;
+    public GameObject[] mapPrefabs;
     public Camera followCameraPrefab;
-    public VehicleStatsController vehicleStatsUIPrefab;
-    public GameObject vehicleHolsterPrefab;
-    public PowerupBox powerupBoxPrefab;
-    public ParticleSystem smokePrefab, firePrefab;
-    public ExplosionController explosionPrefab;
+    //public VehicleStatsController vehicleStatsUIPrefab;
+    public GameObject vehicleHolsterPrefab; //Move to MapController
+    public PowerupBox powerupBoxPrefab; //Move to MapController
+    //public ParticleSystem smokePrefab, firePrefab;
+    //public ExplosionController explosionPrefab;
+
+    //public GarageController garage;
 
     public GameObject pauseMenu;
     public bool paused { get; private set; }
@@ -104,7 +106,7 @@ public class GameMaster : MonoBehaviour
         int vehiclePrefabIndex = 1;
         for(int i = 0; i < humanPlayers; i++)
         {
-            VehicleController humanShip = Instantiate(vehicles[vehiclePrefabIndex++ % vehicles.Length]).GetComponent<VehicleController>();
+            VehicleController humanShip = Instantiate(vehiclePrefabs[vehiclePrefabIndex++ % vehiclePrefabs.Length]);
             humanShip.transform.parent = transform;
 
             cameraTargets.Add(humanShip.transform);
@@ -129,7 +131,7 @@ public class GameMaster : MonoBehaviour
         }
         for(int i = 0; i < cpuPlayers; i++)
         {
-            VehicleController aiShip = Instantiate(vehicles[vehiclePrefabIndex++ % vehicles.Length]).GetComponent<VehicleController>();
+            VehicleController aiShip = Instantiate(vehiclePrefabs[vehiclePrefabIndex++ % vehiclePrefabs.Length]);
             aiShip.transform.parent = transform;
 
             aiShip.mapController = mapInPlay;

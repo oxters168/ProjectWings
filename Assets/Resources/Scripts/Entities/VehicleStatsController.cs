@@ -17,5 +17,6 @@ public class VehicleStatsController : MonoBehaviour
     private void FollowTarget()
     {
         transform.position = target.position + target.up * distance;
+        transform.rotation = Quaternion.identity;
     }
 }

@@ -6,6 +6,11 @@ using System.Collections;
 public class VehicleController : MonoBehaviour, Damageable
 {
     public const float ME2KI = 3600f / 1000f, KI2ME = 1000f / 3600f, KI2MI = 0.621371f;
+
+    public VehicleStatsController statsUIPrefab;
+    public ParticleSystem smokePrefab, firePrefab;
+    public ExplosionController explosionPrefab;
+
     public GameObject vehicleObject;
     public MapController mapController;
     public CameraController followingCamera;
@@ -115,15 +120,15 @@ public class VehicleController : MonoBehaviour, Damageable
     }
     private void PrepareDamageEffects()
     {
-        smoke = Instantiate(mapController.gameMaster.smokePrefab);
+        smoke = Instantiate(smokePrefab);
         smoke.transform.position = smokePosition.position;
         smoke.transform.parent = smokePosition;
 
-        fire = Instantiate(mapController.gameMaster.firePrefab);
+        fire = Instantiate(firePrefab);
         fire.transform.position = firePosition.position;
         fire.transform.parent = firePosition;
 
-        explosion = Instantiate(mapController.gameMaster.explosionPrefab);
+        explosion = Instantiate(explosionPrefab);
         explosion.transform.position = explosionPosition.position;
         explosion.transform.parent = explosionPosition;
     }
@@ -139,7 +144,8 @@ public class VehicleController : MonoBehaviour, Damageable
     }
     private void SetupPopupStatsUI()
     {
-        popupStatsUI = Instantiate(mapController.gameMaster.vehicleStatsUIPrefab);
+        popupStatsUI = Instantiate(statsUIPrefab);
+        popupStatsUI.transform.SetParent(transform);
         popupStatsUI.target = transform;
     }
 
