@@ -9,8 +9,8 @@ public class GameMaster : MonoBehaviour
     public GameObject[] mapPrefabs;
     public Camera followCameraPrefab;
     //public VehicleStatsController vehicleStatsUIPrefab;
-    public GameObject vehicleHolsterPrefab; //Move to MapController
-    public PowerupBox powerupBoxPrefab; //Move to MapController
+    //public GameObject vehicleHolsterPrefab; //Move to MapController
+    //public PowerupBox powerupBoxPrefab; //Move to MapController
     //public ParticleSystem smokePrefab, firePrefab;
     //public ExplosionController explosionPrefab;
 

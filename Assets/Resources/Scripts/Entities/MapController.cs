@@ -2,6 +2,9 @@
 
 public class MapController : MonoBehaviour
 {
+    public GameObject vehicleHolsterPrefab;
+    public PowerupBox powerupBoxPrefab;
+
     public GameMaster gameMaster;
 
     public Transform startingPointPositions, powerupPositions, waypointPositions, flagPositions, hillPositions;
@@ -31,12 +34,9 @@ public class MapController : MonoBehaviour
         for (int i = 0; i < startingPoints.Length; i++)
         {
             startingPoints[i] = startingPointPositions.GetChild(i);
-            if (gameMaster && gameMaster.vehicleHolsterPrefab)
-            {
-                GameObject vehicleHolster = Instantiate(gameMaster.vehicleHolsterPrefab);
-                vehicleHolster.transform.parent = startingPoints[i];
-                vehicleHolster.transform.localPosition = Vector3.zero;
-            }
+            GameObject vehicleHolster = Instantiate(vehicleHolsterPrefab);
+            vehicleHolster.transform.parent = startingPoints[i];
+            vehicleHolster.transform.localPosition = Vector3.zero;
         }
     }
     private void PreparePowerupBoxes()
@@ -44,15 +44,12 @@ public class MapController : MonoBehaviour
         powerupBoxesParent = new GameObject("PowerupBoxes").transform;
         powerupBoxesParent.parent = transform;
 
-        if (gameMaster && gameMaster.powerupBoxPrefab)
+        powerupBoxes = new PowerupBox[powerupPositions.childCount];
+        for (int i = 0; i < powerupBoxes.Length; i++)
         {
-            powerupBoxes = new PowerupBox[powerupPositions.childCount];
-            for (int i = 0; i < powerupBoxes.Length; i++)
-            {
-                powerupBoxes[i] = Instantiate(gameMaster.powerupBoxPrefab);
-                powerupBoxes[i].transform.position = powerupPositions.GetChild(i).position;
-                powerupBoxes[i].transform.parent = powerupBoxesParent;
-            }
+            powerupBoxes[i] = Instantiate(powerupBoxPrefab);
+            powerupBoxes[i].transform.position = powerupPositions.GetChild(i).position;
+            powerupBoxes[i].transform.parent = powerupBoxesParent;
         }
     }
     private void PrepareWaypoints()
